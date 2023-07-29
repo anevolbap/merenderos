@@ -5,7 +5,7 @@ library(mapview)
 library(gapminder)
 library(tmap)
 source("src/utils.R")
-source("src/constantes.R")
+source("src/constants.R")
 
 #' Leer municipios a partir del shape file
 #'
