@@ -1,3 +1,5 @@
+library(sf) # working with geographic data
+
 #' Leer municipios a partir del shape file
 #'
 #' Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02

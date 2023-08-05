@@ -25,3 +25,9 @@ NOMBRE_ALTE_BROWN = "Almirante Brown"
 CODIGOS_VECINOS <- c("06274", "06658", "06260", "06028", "06648", "06490")
 
 RESOLUCION = 9
+
+## MAPA
+ALMTE_BROWN_LAT = -34.8272 # latitud
+ALMTE_BROWN_LNG = -58.3772 # longitud
+MAP_ZOOM_INIT = 12 # zoom inicial (higher number = closer view)
+TITLE_APP = "Merenderos"
