@@ -33,4 +33,8 @@ mapas de hexáonos con colores
 
 ## Requirements:
 
+leaflet:
  sudo apt-get install libgdal-dev gdal-bin libproj-dev proj-data proj-bin libgeos-dev
+
+units:
+sudo apt install libudunits2-dev  

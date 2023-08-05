@@ -1,12 +1,3 @@
-library(sf)
-library(dplyr)
-library(ggplot2)
-library(mapview)
-library(gapminder)
-library(tmap)
-source("src/utils.R")
-source("src/constants.R")
-
 #' Leer municipios a partir del shape file
 #'
 #' Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
