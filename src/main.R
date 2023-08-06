@@ -1,4 +1,54 @@
+library(sf) # working with geographic data
+
 ## Load and process data needed for the maps to be displayed.
+
+#' Leer municipios a partir del shape file
+#'
+#' Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
+cargar_municipios = function(path, download=FALSE){
+    ## TODO: descargar si no esta local
+    ## if (download) descargar_municipios()
+    ## remove_z_coord(filename, paste(filename,"post", sep = "_")){
+
+    return(sf::read_sf(path))
+}
+
+#' Filtra los municipios vecinos a partir del shape file
+#'
+#' Nota: Lomas de Zamora, al este con """Quilmes" y "Florencio Varela",
+#' al sur con Presidente Perón, y al oeste con Esteban Echeverría.
+#' @param map_show logical. Muestra el mapa
+#' @return data.frame. Municipios
+filtrar_municipios = function(df){
+    df %>%
+        filter(grepl(paste(LISTA_VECINOS, collapse = "|"), FNA)) %>%
+        filter(NAM != "Quilmes y los  Sueldos")
+}
+
+
+#' Mostrar mapa
+#'
+#' @param df data.frame. Datos de los municipios vecinos.
+#' @param etiqueta character. Etiqueta.
+#' @return . Mapa
+mostrar_mapa_vecinos = function(df, label="NAM"){
+    tm_shape(df) +
+        tm_polygons() +
+        tm_text(label) +
+        tm_legend()
+}
+
+#' Elimina la coordenada z
+#'
+#' @param df data.frame. Datos de los municipios vecinos.
+#' @param etiqueta character. Etiqueta.
+#' @return . Mapa
+remove_z_coord = function(source, destination){
+    gdal_utils(util = "vectortranslate",
+               source = source,
+               destination = destination,
+               options = c("-dim", "XY"))
+}
 
 load_data = function(){
     ## Datos municipios
@@ -42,7 +92,8 @@ load_data = function(){
 
 process_data = function(data) {
     ## Radios censales filtrados por población menor a 15
-    radios_censales_f1 <- data$radios_censales %>% filter(cod_prov_partido %in% CODIGO_ALTE_BROWN)
+    radios_censales_f1 <- data$radios_censales %>%
+        filter(cod_prov_partido %in% CODIGO_ALTE_BROWN)
     radios_censalesIVS_f1 <- data$radios_censalesIVS %>%
         filter(cod_prov_partido %in% CODIGO_ALTE_BROWN) %>%
         mutate(total_pobl_menor_a_10 = edad_de_10 + edad_de_5_ + edad_de_0_)
@@ -62,23 +113,27 @@ process_data = function(data) {
         )
 
     ##
-    crs_target <- st_crs(hex_alte_brown)
     hexagon <- hex_alte_brown$geometry[100]
     reference_crs <- st_crs(hex_alte_brown$geometry[1:30])
     radios_censalesIVS_f2_st <- st_transform(radios_censalesIVS_f2, crs_target)
 
-    ## FIXME: wtf
+    ## FIXME: needed?
     ## Atencion estos numeros son para el hemisf. norte.
     ## cuando uno cambia a hemisferio sur no se sabe muy bien
-    unidad_area <- units::set_units(hex_area(RESOLUCION, "m2"), hm^2)
-    longitud_hexagono <- edge_length(res = RESOLUCION, unit = "m")
-    area <- 3 * sqrt(3) / 2 * (longitud_hexagono / 100)^2
+    ## unidad_area <- units::set_units(hex_area(RESOLUCION, "m2"), hm^2)
+    ## longitud_hexagono <- edge_length(res = RESOLUCION, unit = "m")
+    ## area <- 3 * sqrt(3) / 2 * (longitud_hexagono / 100)^2
 
     ## En el futuro usar parlapply en vez del for pedorro que puse abajo
-    pop_alte_brown <- calcular_poblacion_h3(hex_alte_brown$geometry, radios_censalesIVS_f2)
+    pop_alte_brown <- calcular_poblacion_h3(
+        hex_alte_brown$geometry,
+        radios_censalesIVS_f2
+    )
     pop_h3 <- pop_alte_brown$pop
     hac_est_h3 <- pop_alte_brown$hac_est
 
+    ## FIXME: should leave only one df and filter with reactivity.
+    
     ##
     hex_alte_brown_pop <- st_as_sf(hex_alte_brown) %>%
         mutate(pobl_menor_a_10 = pop_h3,

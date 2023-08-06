@@ -9,7 +9,6 @@ source("src/constants.R")
 source("src/helpers.R")
 
 ## Helper functions for loading, processing
-source("src/leer_municipios_vecinos.R")
 source("src/main.R")
 
 data = load_data() %>% process_data()
@@ -21,19 +20,18 @@ ui <- fluidPage(
         sidebarPanel(textOutput("panel"), width=2),
         mainPanel(
             tabsetPanel(
-                tabPanel("Mapa principal", tmapOutput("map", height = "95vh")),
+                tabPanel("Mapa principal",
+                         tmapOutput("map", height = "95vh")),
                 tabPanel("Histogramas",
                          plotOutput("histogramas", height = "95vh")),
-                tabPanel("Hacinados hacinados",
-                         tmapOutput("hacinados", height = "95vh")),
-                tabPanel("Hacinados", tmapOutput("hacinados25", height = "95vh")),
+                tabPanel("Hacinados",
+                         tmapOutput("hacinados25", height = "95vh")),
                 tabPanel("Población menor a 10",
                          tmapOutput("poblacion_menor_10", height = "95vh")),
                 tabPanel("Más de 30 chicos + hacinados",
                          tmapOutput("chicos_hacinados", height = "95vh")),
                 tabPanel("Hacinados - extra",
-                         tmapOutput("hacinados_extra", height = "95vh")
-                         )
+                         tmapOutput("hacinados_extra", height = "95vh"))
             )
         )
     )
@@ -44,47 +42,32 @@ server <- function(input, output) {
     output$map <- renderTmap({
         ## Initial map center and zoom level
         cortes = generar_cortes(
-            as.numeric(data$radios_censalesIVS_f2$denspobl_menor_a_10), 7
+            data$radios_censalesIVS_f2$denspobl_menor_a_10, 7
         )
         ## Create the map object
         tm_shape(data$radios_censalesIVS_f2) +
             tm_polygons("total_pobl_menor_a_10", breaks = cortes, alpha = 0.3) +
-            tm_shape(data$municipios_vecinos) +
-            tm_polygons(border.col = 3, lwd = 3, alpha = 0, breaks = cortes)+
-            tm_text("NAM") +
-            tm_shape(data$localidades_alte_brown) +
-            tm_polygons(border.col = 1, lwd = 2, alpha = 0)+
-            tm_text("Name") +
+            plot_municipios(data$municipios_vecinos, cortes) +
+            plot_localidades(data$localidades_alte_brown) +
             plot_hex(data$merenderos_lng_lat, RESOLUCION) +
             plot_hex(data$efectores_lng_lat, RESOLUCION) +
             plot_hex_in_hex(data$hex_municipios, data$hex_alte_brown)
+            ## Densidad hogares hacinados por censo y por hexagono (para
+            ## controlar que esta bien la transferencia)
+            tm_shape(hex_alte_brown_pop)+  # FIXME: revisar!
+            tm_polygons("densidad_hogares_hacinados",border.col = 1,
+                        breaks =        generar_cortes(data$hex_alte_brown_pop$densidad_hogares_hacinados, 7),
+                        alpha = 0.5) +
+            tm_polygons("densidad_hogares_hacinados", border.col = 1,
+                        breaks =            generar_cortes(data$radios_censalesIVS_f2$densidad_hogares_hacinados, 7),
+                        alpha = 0.5)
     })
     output$histogramas <- renderPlot({
-        ## Nota:
-        ##   estos numeros son para Alte. Brown
-        ##   - cada hexagono con resolucion 9 es del orden de 7.28+/- 0.01 hectáreas
-        ##   - cada hexagono con resolucion 9 tiene longitud de 168.4+/- 0.2m
-        par(mfrow=c(2, 2))
-        hist(data$hex_alte_brown_pop$areash)
-        hist(data$hex_alte_brown_pop$perimetro / 6)
-        hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
-        hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
-    })
-    output$hacinados <- renderTmap({
-        ## Densidad hogares hacinados por censo y por hexagono (para
-        ## controlar que esta bien la transferencia)
-        ## tm_shape(hex_alte_brown_pop)+  # FIXME: revisar!
-        tm_shape(data$radios_censalesIVS_f2) +
-            tm_polygons("densidad_hogares_hacinados",border.col = 1,
-                        breaks =        generar_cortes(as.numeric(data$hex_alte_brown_pop$densidad_hogares_hacinados), 7),
-                        alpha = 0.5)+
-            tm_polygons("densidad_hogares_hacinados", border.col = 1,
-                        breaks =            generar_cortes(as.numeric(data$radios_censalesIVS_f2$densidad_hogares_hacinados), 7),
-                        alpha = 0.5)
+        plot_histogramas(data)
     })
     output$hacinados25 <- renderTmap({
         cortes = generar_cortes(
-    as.numeric(data$hex_alte_brown_pop$densidad_hogares_hacinados), 7
+    data$hex_alte_brown_pop$densidad_hogares_hacinados, 7
     )
         ## Hexágonos con el 25% más necesitado.
         tm_shape(data$hex_alte_brown_pop_25) +
@@ -98,7 +81,7 @@ server <- function(input, output) {
                         alpha = 0.5)
     })
     output$poblacion_menor_10 <- renderTmap({
-        mybreaks=generar_cortes(as.numeric(data$hex_alte_brown_pop$denspobl_menor_a_10), 10)
+        mybreaks=generar_cortes(data$hex_alte_brown_pop$denspobl_menor_a_10, 10)
         tm_shape(data$hex_alte_brown_pop, alpha = 0.3)+
             tm_polygons("denspobl_menor_a_10",
                         border.col = 1,
@@ -117,14 +100,14 @@ server <- function(input, output) {
         tm_shape(data$hex_alte_brown2, alpha = 0.3) +
             tm_polygons("index_geom",
                         border.col = 1,
-                        breaks = generar_cortes(as.numeric(data$hex_alte_brown2$index_geom), 10),
+                        breaks = generar_cortes(data$hex_alte_brown2$index_geom, 10),
                         alpha = 0.3)
     })
     output$hacinados_extra <- renderTmap({
         tm_shape(data$hex_alte_brown_pop %>%
                  rename(`número de hogares hacinados por celda`=hac_est)) +
             tm_polygons("número de hogares hacinados por celda", border.col = 1,
-                        breaks =   generar_cortes(round(as.numeric(data$hex_alte_brown_pop$hac_est)),7)[-1],
+                        breaks =   generar_cortes(round(data$hex_alte_brown_pop$hac_est), 7)[-1],
                         alpha = 0.5)
     })   
 }

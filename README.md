@@ -3,6 +3,13 @@
 He aquí el mapa interactivo de merenderos del municipio de Almirante
 Brown.
 
+## TODO:
+
+- Improve loading data functions / cache.
+- Brush up the readme.
+- Add linter/actions.
+- Set up renv.
+
 ## Instalación 
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -14,27 +21,14 @@ pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
 culpa qui officia deserunt mollit anim id est laborum.
 
 ## Indicadores sociales:
-- main_transferencia_pablo_indicadores
-- mapas:
-  - sf - mapas - geometría de la cosa
- - mapview
-- utils
- - misgunciones
- - leer_municipios_vecinos (fuente archivo shp, estandar viejo)
 
-mapa radio censal, datos indec
-
-IVS: índice vulnerabilidad por radio censal
-
-h3: uber hexagonos jerarquico
-
-hexagonsalte1 es el output final
-mapas de hexáonos con colores
+- Mapa radio censal, datos Indec.
+- IVS: índice vulnerabilidad por radio censal.
 
 ## Requirements:
 
-leaflet:
+Leaflet:
  sudo apt-get install libgdal-dev gdal-bin libproj-dev proj-data proj-bin libgeos-dev
 
-units:
-sudo apt install libudunits2-dev  
+Units:
+sudo apt install libudunits2-dev.

@@ -4,6 +4,7 @@ library(h3) # uber
 
 #' Generar cortes según cuantiles
 generar_cortes <- function(x, n){
+    x <- as.numeric(x)
     points <- (2:n-1) / n
     ret <- c(min(x) - 1e-8,
             quantile(x, points, na.rm = TRUE),
@@ -67,7 +68,6 @@ calcular_poblacion_h3 <- function(hexagon_list, radios_censales_f2){
 }
 
 ## Utilidades para graficar los mapas
-
 #' Mostrar mapa de hexágonos
 plot_hexagons <- function(hexagons_df){
     tm_shape(hexagons_df, alpha = 0.2) +
@@ -98,4 +98,28 @@ plot_cortes <- function(radios, cortes, municipios_df, localidades, columna){
         tm_shape(localidades) +
         tm_polygons(border.col = 1, lwd = 2, alpha = 0)+
         tm_text("Name")
+}
+
+plot_municipios <- function(municipios_vecinos, cortes) {
+    tm_shape(municipios_vecinos) +
+        tm_polygons(border.col = 3, lwd = 3, alpha = 0, breaks = cortes) +
+        tm_text("NAM")
+    }
+
+plot_localidades <- function(localidades) {
+    tm_shape(localidades) +
+        tm_polygons(border.col = 1, lwd = 2, alpha = 0) +
+        tm_text("Name")
+    }
+
+plot_histogramas <- function(data) {
+    #' Nota:
+    #'   estos numeros son para Alte. Brown
+    #'   - cada hexagono con resolucion 9 es del orden de 7.28+/- 0.01 hectáreas
+    #'   - cada hexagono con resolucion 9 tiene longitud de 168.4+/- 0.2m
+    par(mfrow=c(2, 2))
+    hist(data$hex_alte_brown_pop$areash)
+    hist(data$hex_alte_brown_pop$perimetro / 6)
+    hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
+    hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
 }
