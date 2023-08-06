@@ -117,9 +117,25 @@ plot_histogramas <- function(data) {
     #'   estos numeros son para Alte. Brown
     #'   - cada hexagono con resolucion 9 es del orden de 7.28+/- 0.01 hectáreas
     #'   - cada hexagono con resolucion 9 tiene longitud de 168.4+/- 0.2m
-    par(mfrow=c(2, 2))
-    hist(data$hex_alte_brown_pop$areash)
-    hist(data$hex_alte_brown_pop$perimetro / 6)
-    hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
-    hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
+    hist_data <- data.frame(
+        variable = rep(c("areash", "perimetro / 6", "densidad_hogares_hacinados"),
+                       each = nrow(data)),
+        value = c(data$hex_alte_brown_pop$areash,
+                  data$hex_alte_brown_pop$perimetro / 6,
+                  data$radios_censalesIVS_f2$densidad_hogares_hacinados,
+                  data$hex_alte_brown_pop$densidad_hogares_hacinados)
+    )
+
+    ## Plot the histograms in a 2x2 grid using facet_wrap
+    ggplot(hist_data, aes(x = value)) +
+        geom_histogram(binwidth = 1, color = "white", fill = "steelblue") +
+        labs(x = NULL, y = "Frequency") +
+        facet_wrap(~ variable, nrow = 2) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    ## par(mfrow=c(2, 2))
+    ## hist(data$hex_alte_brown_pop$areash)
+    ## hist(data$hex_alte_brown_pop$perimetro / 6)
+    ## hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
+    ## hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
 }
