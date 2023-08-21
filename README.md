@@ -12,23 +12,37 @@ Brown.
 
 ## Instalación 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat. Duis aute irure dolor in
-reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-culpa qui officia deserunt mollit anim id est laborum.
+Clonar el repositorio o descargar el código fuente:
+``` bash
+git clone git@github.com:anevolbap/merenderos.git
+```
 
-## Indicadores sociales:
+Para instalar las dependencias necesarias se sugiere usar la librería
+[`renv`](https://rstudio.github.io/renv/articles/renv.html "renv").
+``` rdoc
+# install.packages("renv")
+renv::restore()
+```
+
+Para abrir la aplicación en el navegador:
+``` rdoc
+library(shiny)
+run_app("mapa_app.R")
+```
+
+### Dependencias 
+
+Algunas librerías pueden requerir dependencias previas:
+- units: libudunits2-dev
+
+## Datos
+
+Los datos pueden descargarse del siguiente link.
+
+### Municipios
+- Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
+
+### Indicadores sociales:
 
 - Mapa radio censal, datos Indec.
 - IVS: índice vulnerabilidad por radio censal.
-
-## Requirements:
-
-Leaflet:
- sudo apt-get install libgdal-dev gdal-bin libproj-dev proj-data proj-bin libgeos-dev
-
-Units:
-sudo apt install libudunits2-dev.

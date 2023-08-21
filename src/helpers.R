@@ -7,8 +7,8 @@ generar_cortes <- function(x, n){
     x <- as.numeric(x)
     points <- (2:n-1) / n
     ret <- c(min(x) - 1e-8,
-            quantile(x, points, na.rm = TRUE),
-            max(x) + 1e-8)
+             quantile(x, points, na.rm = TRUE),
+             max(x) + 1e-8)
     return(ret)
 }
 
@@ -21,13 +21,16 @@ get_hexagons_from_df <- function(df, res = 9){
 }
 
 #' Particion interior del municipio como hexagonos
-get_inner_hexagons_from_df <- function(df, municipio = NOMBRE_ALTE_BROWN, res = 9){
-    df <- df[df$NAM == municipio, ]
+get_inner_hexagons_from_df <- function(df, res = 9){
+    ## df <- df[df$NAM == municipio, ]
     h3_index <- polyfill(polygon = df$geometry, res = res)
     hexagons <- h3_to_geo_boundary_sf(h3_index)
+    return(hexagons)
 }
 
-calcular_poblacion_h3_single <- function(hexagon, radios_censales_f2){
+calcular_poblacion_h3_single <- function(hexagon,
+                                         radios_censalesIVS_f2,
+                                         reference_crs) {
     crs_target <- reference_crs
     crs_input <- st_crs(radios_censalesIVS_f2)
     if(crs_target != crs_input){
@@ -40,19 +43,22 @@ calcular_poblacion_h3_single <- function(hexagon, radios_censales_f2){
     areas <- st_area(st_intersection(hexagon, radios_censalesIVS_f2[indices, ]$geometry))
     areas <- units::set_units(areas, hm^2)
     pop_est <- round(sum(areas * densidad), 3)
-    ## revisar lo de nbi
+    ## FIXME: revisar lo de nbi
     ## nbi_est=round(sum(areas*densporc_hogar))
     hac_est1 <- round(sum(areas * densidad_hogares_hacinados), 5)
     return(list(pop = pop_est, hac_est = hac_est1))
 }
 
-calcular_poblacion_h3 <- function(hexagon_list, radios_censales_f2){
+calcular_poblacion_h3 <- function(hexagon_list,
+                                  radios_censales_f2,
+                                  radios_censalesIVS_f2,
+                                  reference_crs) {
     #' funcion que recibe una lista de hexagonos y luego transfiere consistentemente
     #' la cantidad asociada al radio censal a cada hexagono
     #' pone la variable equivalente de cada hexagono.
     crs_target <- st_crs(hexagon_list)
     radios_censales_f2 <- st_transform(radios_censales_f2,
-                                      crs_target)
+                                       crs_target)
     N <- length(hexagon_list)
     pop <- numeric(N)
     hac_est <- numeric(N)
@@ -60,7 +66,8 @@ calcular_poblacion_h3 <- function(hexagon_list, radios_censales_f2){
     ## pero lapply no funco)
     for (j in 1:N) {
         result <- calcular_poblacion_h3_single(hexagon_list[j],
-                                               radios_censalesIVS_f2)
+                                               radios_censalesIVS_f2,
+                                               reference_crs)
         pop[j] <- result$pop
         hac_est[j] <- result$hac_est
     }
@@ -104,38 +111,38 @@ plot_municipios <- function(municipios_vecinos, cortes) {
     tm_shape(municipios_vecinos) +
         tm_polygons(border.col = 3, lwd = 3, alpha = 0, breaks = cortes) +
         tm_text("NAM")
-    }
+}
 
 plot_localidades <- function(localidades) {
     tm_shape(localidades) +
         tm_polygons(border.col = 1, lwd = 2, alpha = 0) +
         tm_text("Name")
-    }
+}
 
 plot_histogramas <- function(data) {
     #' Nota:
     #'   estos numeros son para Alte. Brown
     #'   - cada hexagono con resolucion 9 es del orden de 7.28+/- 0.01 hectáreas
     #'   - cada hexagono con resolucion 9 tiene longitud de 168.4+/- 0.2m
-    hist_data <- data.frame(
-        variable = rep(c("areash", "perimetro / 6", "densidad_hogares_hacinados"),
-                       each = nrow(data)),
-        value = c(data$hex_alte_brown_pop$areash,
-                  data$hex_alte_brown_pop$perimetro / 6,
-                  data$radios_censalesIVS_f2$densidad_hogares_hacinados,
-                  data$hex_alte_brown_pop$densidad_hogares_hacinados)
-    )
+    ## hist_data <- data.frame(
+    ##     variable = rep(c("areash", "perimetro / 6", "densidad_hogares_hacinados"),
+    ##                    each = nrow(data)),
+    ##     value = c(data$hex_alte_brown_pop$areash,
+    ##               data$hex_alte_brown_pop$perimetro / 6,
+    ##               data$radios_censalesIVS_f2$densidad_hogares_hacinados,
+    ##               data$hex_alte_brown_pop$densidad_hogares_hacinados)
+    ## )
 
-    ## Plot the histograms in a 2x2 grid using facet_wrap
-    ggplot(hist_data, aes(x = value)) +
-        geom_histogram(binwidth = 1, color = "white", fill = "steelblue") +
-        labs(x = NULL, y = "Frequency") +
-        facet_wrap(~ variable, nrow = 2) +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    ## par(mfrow=c(2, 2))
-    ## hist(data$hex_alte_brown_pop$areash)
-    ## hist(data$hex_alte_brown_pop$perimetro / 6)
-    ## hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
-    ## hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
+    ## ## Plot the histograms in a 2x2 grid using facet_wrap
+    ## ggplot(hist_data, aes(x = value)) +
+    ##     geom_histogram(binwidth = 1, color = "white", fill = "steelblue") +
+    ##     labs(x = NULL, y = "Frequency") +
+    ##     facet_wrap(~ variable, nrow = 2) +
+    ##     theme_minimal() +
+    ##     theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    par(mfrow=c(2, 2))
+    hist(data$hex_alte_brown_pop$areash)
+    hist(data$hex_alte_brown_pop$perimetro / 6)
+    hist(data$radios_censalesIVS_f2$densidad_hogares_hacinados)
+    hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
 }
