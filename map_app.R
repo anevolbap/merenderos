@@ -2,11 +2,8 @@ library(shiny)
 library(dplyr)
 library(tmap)
 
-## Constants project-wide    
 source("src/constants.R")
-
-## Helper functions for loading, processing
-source("src/helpersmain.R")
+source("src/helpers.R")
 
 ## Load and process data
 data = load_data() %>% process_data()
