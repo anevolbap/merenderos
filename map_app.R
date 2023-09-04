@@ -18,7 +18,7 @@ ui <- fluidPage(
                 tabPanel("Mapa principal",
                          tmapOutput("map", height = "95vh")),
                 tabPanel("Mapa hexágonos",
-                        tmapOutput("map_hex", height = "95vh")),
+                        tmapOutput("map_hex", height = "95vh"))
             )
         )
     )
@@ -49,7 +49,8 @@ server <- function(input, output) {
         ## Plot hexagons
             tm_shape(data$localidades, name="Localidades") +
                 tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
-                plot_hex(data$hex_municipios$geometry, "local", RESOLUCION) + 
+                plot_hex(data$hex_municipios$geometry, "local", RESOLUCION) +
+                plot_hex(data$hex_alte_brown$geometry, "brown", RESOLUCION)     
    })
 }
 

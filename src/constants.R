@@ -1,9 +1,9 @@
 ## Data filenames
 MUNICIPIOS_SHP_PATH = "data/ign_municipio.shp"
-BROWN_KML_PATH = "data/ALMIRANTE_BROWN_2020.kml"
-COMEDORES_KML_PATH = "data/comedores_merenderos.kml"
 RADIOS_SHP_PATH = "data/Buenos_Aires_con_datos.shp"
 RADIOSIVS_SHP_PATH = "data/Indice_de_Vulnerabilidad_por_Radio_Censal.shp"
+BROWN_KML_PATH = "data/ALMIRANTE_BROWN_2020.kml"
+COMEDORES_KML_PATH = "data/comedores_merenderos.kml"
 MUNICIPIOS_LAYER <- "ign_municipio"
 LOCALIDADES_LAYER <- "Localidades de Almirante Brown"
 EFECTORES_LAYER <- "Efectores de salud"
@@ -29,7 +29,7 @@ ALMTE_BROWN_LNG <- -58.3772 # longitud
 MAP_ZOOM_INIT <- 12 # initial zoom (higher number = closer view)
 
 ## HEXAGONS
-RESOLUCION = 8
+RESOLUCION = 9
 
 ## APP
 TITLE_APP <- "Merenderos"
