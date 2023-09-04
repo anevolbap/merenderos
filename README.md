@@ -39,6 +39,8 @@ Algunas librerías pueden requerir dependencias previas:
 
 Los datos pueden descargarse del siguiente link.
 
+(Nota: bajo el directorio `/data/` deben estar los datos.)
+
 ### Municipios
 - Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
 

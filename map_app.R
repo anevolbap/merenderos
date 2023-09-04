@@ -49,10 +49,7 @@ server <- function(input, output) {
         ## Plot hexagons
             tm_shape(data$localidades, name="Localidades") +
                 tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
-            tm_shape(get_inner_hexagons_from_df(data$municipios)) +
-                    tm_polygons(border.col = 1, lwd = 2, col ="red", alpha = 0) +
-            tm_shape(get_inner_hexagons_from_df(data$localidades)) +
-                    tm_polygons(border.col = 1, lwd = 2, col ="blue", alpha = 0)
+                plot_hex(data$hex_municipios$geometry, "local", RESOLUCION) + 
    })
 }
 
