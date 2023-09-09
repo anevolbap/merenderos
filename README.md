@@ -15,10 +15,9 @@ Segundo, instalar las dependencias necesarias manualmente o con la librería [`r
 renv::restore()
 ```
 
-Por último, abrir la aplicación en el navegador desde la consola de R:
+Por último, desde la consola de R, abrir la aplicación de Shiny en el navegador.
 ``` rdoc
-library(shiny)
-run_app("mapa_app.R")
+shiny::run_app("mapa_app.R")
 ```
 
 ## Datos
