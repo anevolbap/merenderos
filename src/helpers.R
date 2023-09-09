@@ -1,7 +1,9 @@
 library(sf)
 library(h3)
 
-#' Load data
+#' Load all required data
+#' 
+#' @returns A list of sf dataframes.
 load_data <- function() {  
     ## Define a function to read spatial data
     read_spatial_data <- function(file_path, layer_name) {
@@ -29,6 +31,9 @@ load_data <- function() {
 }
 
 #' Process data required for the maps
+#'
+#' @params data A list of sf dataframes.
+#' @returns An extended list with processed data.
 process_data <- function(data) {
     ## Some cleaning
     data$radiosIVS["cod_prov"] <- substr(data$radiosIVS$link, 1, MUNICIPIO_CODE_NCHAR)
@@ -39,7 +44,7 @@ process_data <- function(data) {
     hex_municipios <- get_hexagons_from_df(data$localidades)
     hex_alte_brown <- get_inner_hexagons_from_df(data$municipios, res = RESOLUCION)
     
-    ## ## Radios censales filtrados
+    ## Filtered districts
     radiosIVS_filt <- data$radiosIVS %>%
         filter(cod_prov == COD_ALTE_BROWN) %>%
         mutate(pobl_menor_a_10 = edad_de_10 + edad_de_5_ + edad_de_0_) %>%
@@ -51,30 +56,41 @@ process_data <- function(data) {
     
     ## FIXME: pending!
     ## Calcular la poblacion total y hacinados en un poligono.
-
+    ##
+    
     return(c(data, list(radiosIVS_filt = radiosIVS_filt,
                         hex_municipios = hex_municipios,
                         hex_alte_brown = hex_alte_brown)))
 }
 
-## Manejar hexágonos
+## FIXME: check docs!
+
+#' Parse geometry into hexagons
+#'
+#' @params geometry A sf dataframe 
+#' @params res An integer for h3 map resolution.
+#'
+#' @returns List of hexagon indices 
 get_hexagons_from_df <- function(geometry, res = RESOLUCION){
-    #' Calcular hexágonos
     lat_lng <- st_coordinates(geometry, res = res)[ , 2:1]
     h3_index <- geo_to_h3(lat_lng, res = res)
     hexagons <- h3_to_geo_boundary_sf(h3_index)
     return(hexagons)
 }
 
+#' Parse geometry into hexagons
+#'
+#' @params geometry A sf dataframe 
+#' @params res An integer for h3 map resolution.
+#'
+#' @returns List of hexagon indices 
 get_inner_hexagons_from_df <- function(df, res = 9){
     h3_index <- polyfill(polygon = df, res = res)
     hexagons <- h3_to_geo_boundary_sf(h3_index)
     return(hexagons)
 }
 
-## Utilidades para graficar los mapas
-
-#' Generar cortes según cuantiles
+#' Cut by quantiles
 generar_cortes <- function(x, n){
     x <- as.numeric(x)
     points <- (2:n-1) / n
@@ -84,7 +100,11 @@ generar_cortes <- function(x, n){
     return(ret)
 }
 
-#' Mostrar mapa de hexágonos
+#' Plot a geometry as hexagons
+#'
+#' @params hex_df
+#' @params name
+#' @params resolucion
 plot_hex <- function(hex_df, name, resolucion) {
     tm_shape(
         get_hexagons_from_df(hex_df, resolucion),
@@ -93,7 +113,6 @@ plot_hex <- function(hex_df, name, resolucion) {
         tm_polygons(border.col = 1, alpha = 0.2) 
 }
 
-## FIXME: revisar lo de abajo
 
 ## FIXME: se puede borrar?
 plot_histogramas <- function(data) {
@@ -109,7 +128,7 @@ plot_histogramas <- function(data) {
 }
 
 
-## FIXME: revisar
+## FIXME: arreglar esto!
 calcular_poblacion_h3 <- function(hexagon, radios) {
     #' funcion que recibe una lista de hexagonos y luego transfiere
     #consistentemente ' la cantidad asociada al radio censal a cada
