@@ -46,12 +46,14 @@ server <- function(input, output) {
     })
     
     output$map_hex <- renderTmap({
-        ## Plot hexagons
+         ## Plot hexagons
             tm_shape(data$localidades, name="Localidades") +
-                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
-                plot_hex(data$hex_municipios$geometry, "local", RESOLUCION) +
-                plot_hex(data$hex_alte_brown$geometry, "brown", RESOLUCION)     
-   })
+                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)   +
+            tm_shape(data$hex_municipios, name="hex_municipios")  +    
+                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) + 
+            tm_shape(data$hex_alte_brown, name = "hex_alte_brown") +
+                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
+       })
 }
 
 ## Run the Shiny App
