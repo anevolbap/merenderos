@@ -33,16 +33,37 @@ load_data <- function() {
 #' Process data required for the maps
 #'
 #' @params data A list of sf dataframes.
+#' 
 #' @returns An extended list with processed data.
 process_data <- function(data) {
+
+    ## FIXME: revisit this substr!
     ## Some cleaning
     data$radiosIVS["cod_prov"] <- substr(data$radiosIVS$link, 1, MUNICIPIO_CODE_NCHAR)
     data$municipios <- data$municipios[data$municipios$FNA %in% MUNICIPIOS, ]
     data$radios["cod_prov"] <- substr(data$radios$link, 1, MUNICIPIO_CODE_NCHAR)
 
+    ## FIXME: avoid loop and move to helper!
     ## Get hexagons
-    hex_municipios <- get_hexagons_from_df(data$localidades)
-    hex_alte_brown <- get_inner_hexagons_from_df(data$municipios, res = RESOLUCION)
+    hex_municipios <- list()
+    for (localidad in 1:nrow(data$localidades)) {
+        hex_municipios = c(
+            hex_municipios,
+            polyfill(
+                data$localidades$geometry[localidad],
+                res = RESOLUCION
+            )
+        )
+    }
+    hex_municipios <- h3_to_geo_boundary_sf(unlist(hex_municipios))
+    hex_alte_brown <- list()
+    for (localidad in 1:nrow(data$municipios)) {
+        hex_alte_brown = c(
+            hex_alte_brown,
+            polyfill(data$municipios$geometry[localidad], res = RESOLUCION)
+        )
+    }
+    hex_alte_brown <- h3_to_geo_boundary_sf(unlist(hex_alte_brown))
     
     ## Filtered districts
     radiosIVS_filt <- data$radiosIVS %>%
@@ -65,6 +86,16 @@ process_data <- function(data) {
 
 ## FIXME: check docs!
 
+#' Cut by quantiles
+generar_cortes <- function(x, n){
+    x <- as.numeric(x)
+    points <- (2:n-1) / n
+    ret <- c(min(x) - 1e-8,
+             quantile(x, points, na.rm = TRUE),
+             max(x) + 1e-8)
+    return(ret)
+}
+
 #' Parse geometry into hexagons
 #'
 #' @params geometry A sf dataframe 
@@ -76,28 +107,6 @@ get_hexagons_from_df <- function(geometry, res = RESOLUCION){
     h3_index <- geo_to_h3(lat_lng, res = res)
     hexagons <- h3_to_geo_boundary_sf(h3_index)
     return(hexagons)
-}
-
-#' Parse geometry into hexagons
-#'
-#' @params geometry A sf dataframe 
-#' @params res An integer for h3 map resolution.
-#'
-#' @returns List of hexagon indices 
-get_inner_hexagons_from_df <- function(df, res = 9){
-    h3_index <- polyfill(polygon = df, res = res)
-    hexagons <- h3_to_geo_boundary_sf(h3_index)
-    return(hexagons)
-}
-
-#' Cut by quantiles
-generar_cortes <- function(x, n){
-    x <- as.numeric(x)
-    points <- (2:n-1) / n
-    ret <- c(min(x) - 1e-8,
-             quantile(x, points, na.rm = TRUE),
-             max(x) + 1e-8)
-    return(ret)
 }
 
 #' Plot a geometry as hexagons
@@ -112,7 +121,6 @@ plot_hex <- function(hex_df, name, resolucion) {
         name=name) +
         tm_polygons(border.col = 1, alpha = 0.2) 
 }
-
 
 ## FIXME: se puede borrar?
 plot_histogramas <- function(data) {
