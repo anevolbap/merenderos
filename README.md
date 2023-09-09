@@ -1,50 +1,35 @@
 # Merenderos
 
-He aquí el mapa interactivo de merenderos del municipio de Almirante
-Brown.
-
-## TODO:
-
-- Improve loading data functions / cache.
-- Brush up the readme.
-- Add linter/actions.
-- Set up renv.
+Mapa interactivo de merenderos del municipio de Almirante Brown.
 
 ## Instalación 
 
-Clonar el repositorio o descargar el código fuente:
+El primer paso es clonar el repositorio o descargar su código fuente.
 ``` bash
 git clone git@github.com:anevolbap/merenderos.git
 ```
 
-Para instalar las dependencias necesarias se sugiere usar la librería
-[`renv`](https://rstudio.github.io/renv/articles/renv.html "renv").
+Segundo, instalar las dependencias necesarias manualmente o con la librería [`renv`](https://rstudio.github.io/renv/articles/renv.html "renv").
 ``` rdoc
 # install.packages("renv")
 renv::restore()
 ```
 
-Para abrir la aplicación en el navegador:
+Por último, abrir la aplicación en el navegador desde la consola de R:
 ``` rdoc
 library(shiny)
 run_app("mapa_app.R")
 ```
 
-### Dependencias 
-
-Algunas librerías pueden requerir dependencias previas:
-- units: libudunits2-dev
-
 ## Datos
 
-Los datos pueden descargarse del siguiente link.
+El mapa busca los datos en el directorio `/data/` que **no
+está incluido** en este repositorio. Los datos pueden descargarse del
+siguiente [link](pendiente "pendiente") (pendiente).
 
-(Nota: bajo el directorio `/data/` deben estar los datos.)
+### Fuentes originales 
+- Municipios: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
 
-### Municipios
-- Fuente: https://datos.gob.ar/dataset/ign-unidades-territoriales/archivo/ign_01.04.02
+## Colaboración
 
-### Indicadores sociales:
-
-- Mapa radio censal, datos Indec.
-- IVS: índice vulnerabilidad por radio censal.
+Abrir un [issue](https://docs.github.com/es/issues/tracking-your-work-with-issues/creating-an-issue "lo qué?") aquí en Github.
