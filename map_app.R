@@ -18,7 +18,7 @@ ui <- fluidPage(
                 tabPanel("Mapa principal",
                          tmapOutput("map", height = "95vh")),
                 tabPanel("Mapa hexágonos",
-                        tmapOutput("map_hex", height = "95vh"))
+                         tmapOutput("map_hex", height = "95vh"))
             )
         )
     )
@@ -44,16 +44,16 @@ server <- function(input, output) {
             plot_hex(data$merenderos, "merenderos", RESOLUCION) +
             plot_hex(data$efectores, "efectores", RESOLUCION)
     })
-    
+
     output$map_hex <- renderTmap({
-         ## Plot hexagons
-            tm_shape(data$localidades, name="Localidades") +
-                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)   +
-            tm_shape(data$hex_municipios, name="hex_municipios")  +    
-                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) + 
+        ## Plot hexagons
+        tm_shape(data$localidades, name="Localidades") +
+            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
+            tm_shape(data$hex_municipios, name="hex_municipios")  +
+            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
             tm_shape(data$hex_alte_brown, name = "hex_alte_brown") +
-                tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
-       })
+            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
+    })
 }
 
 ## Run the Shiny App
