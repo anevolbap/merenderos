@@ -4,7 +4,8 @@ library(h3)
 #' Load all required data
 #' 
 #' @returns A list of sf dataframes.
-load_data <- function() {  
+load_data <- function() {
+
     ## Define a function to read spatial data
     read_spatial_data <- function(file_path, layer_name) {
         data <- st_read(dsn = file_path, layer = layer_name)
@@ -43,7 +44,7 @@ process_data <- function(data) {
     data$municipios <- data$municipios[data$municipios$FNA %in% MUNICIPIOS, ]
     data$radios["cod_prov"] <- substr(data$radios$link, 1, MUNICIPIO_CODE_NCHAR)
 
-    ## FIXME: avoid loop and move to helper!
+    ## FIXME: avoid loop, repeated code and move to helper!
     ## Get hexagons
     hex_municipios <- list()
     for (localidad in 1:nrow(data$localidades)) {
@@ -56,6 +57,7 @@ process_data <- function(data) {
         )
     }
     hex_municipios <- h3_to_geo_boundary_sf(unlist(hex_municipios))
+
     hex_alte_brown <- list()
     for (localidad in 1:nrow(data$municipios)) {
         hex_alte_brown = c(
@@ -65,7 +67,7 @@ process_data <- function(data) {
     }
     hex_alte_brown <- h3_to_geo_boundary_sf(unlist(hex_alte_brown))
     
-    ## Filtered districts
+    ## Compute statistics
     radiosIVS_filt <- data$radiosIVS %>%
         filter(cod_prov == COD_ALTE_BROWN) %>%
         mutate(pobl_menor_a_10 = edad_de_10 + edad_de_5_ + edad_de_0_) %>%
@@ -135,19 +137,36 @@ plot_histogramas <- function(data) {
     hist(data$hex_alte_brown_pop$densidad_hogares_hacinados)
 }
 
+#' Transfiere los datos de los radios censales a los correspondientes
+#' hexágonos.
+#'
+#' @params radios sf object.
+#' returns hex_list matrix with transferred data
+calcular_poblacion_h3  <- function(radios) {
+    hex_list <- list()
+    for (r in 1:nrow(radios)) {
+        hex <- polyfill(radios$geometry[r], res = RESOLUCION)
+        densidad <- radios$denspobl_menor_a_10[r]
+        densidad_hogares_hacinados <-radios$densidad_hogares_hacinados[r]
 
-## FIXME: arreglar esto!
-calcular_poblacion_h3 <- function(hexagon, radios) {
-    #' funcion que recibe una lista de hexagonos y luego transfiere
-    #consistentemente ' la cantidad asociada al radio censal a cada
-    #hexagono ' pone la variable equivalente de cada hexagono.
-    indices <- unlist(st_intersects(hexagon, radios$geometry))    
-    filtered_radios <- radios[indices,] %>%
-        mutate(areas = st_intersection(hexagon, .$geometry) %>%
-                   st_area() %>%
-                   units::set_units(hm^2),
-               pop_est = round(sum(areas * denspobl_menor_a_10), 3),
-               hac_est = round(sum(areas * densidad_hogares_hacinados), 5)) %>%
-        select(pop_est, hac_est)
-    return(filtered_radios)
+        for (h in 1:length(hex)) {
+            polig <- h3_to_geo_boundary_sf(hex[h])
+            polig <- st_transform(polig, st_crs(radios$geometry[r]))
+            areas <- st_area(
+                st_intersection(
+                    polig$geometry,
+                    radios$geometry[r])
+            )
+            areas <- units::set_units(areas,"hm^2")
+            pop_est <- round(sum(areas * densidad), 3)
+            hac_est <- round(sum(areas * densidad_hogares_hacinados), 5)
+            hex_list <- rbind(hex_list,
+                              c(hex = hex[h],
+                                pop = unlist(pop_est),
+                                hac_est = unlist(hac_est)))
+        }    
+    }
+    hex_list[, "pop"] = as.numeric(hex_list[, "pop"])
+    hex_list[, "hac_est"] = as.numeric(hex_list[, "hac_est"])
+    return(hex_list)
 }
