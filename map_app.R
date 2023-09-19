@@ -1,7 +1,6 @@
 library(shiny)
 library(dplyr)
 library(tmap)
-
 source("src/constants.R")
 source("src/helpers.R")
 
@@ -17,6 +16,8 @@ ui <- fluidPage(
             tabsetPanel(
                 tabPanel("Mapa principal",
                          tmapOutput("map", height = "95vh")),
+                tabPanel("Mapa principal_juan",
+                         tmapOutput("map_juan", height = "95vh")),
                 tabPanel("Mapa hexágonos",
                          tmapOutput("map_hex", height = "95vh"))
             )
@@ -54,6 +55,13 @@ server <- function(input, output) {
             tm_shape(data$hex_alte_brown, name = "hex_alte_brown") +
             tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
     })
+    output$map_juan <- renderTmap({
+      #codigo 
+      tm_shape(data$localidades, name="Localidades") +
+        tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
+    
+    })
+    
 }
 
 ## Run the Shiny App
