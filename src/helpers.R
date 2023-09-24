@@ -43,7 +43,6 @@ process_data <- function(data) {
     data$radiosIVS["cod_prov"] <- substr(data$radiosIVS$link, 1, MUNICIPIO_CODE_NCHAR)
     data$municipios <- data$municipios[data$municipios$FNA %in% MUNICIPIOS, ]
     data$radios["cod_prov"] <- substr(data$radios$link, 1, MUNICIPIO_CODE_NCHAR)
-
     ## FIXME: avoid loop, repeated code and move to helper!
     ## Get hexagons
     hex_municipios <- list()
@@ -57,7 +56,6 @@ process_data <- function(data) {
         )
     }
     hex_municipios <- h3_to_geo_boundary_sf(unlist(hex_municipios))
-
     hex_alte_brown <- list()
     for (localidad in 1:nrow(data$municipios)) {
         hex_alte_brown = c(
@@ -66,7 +64,6 @@ process_data <- function(data) {
         )
     }
     hex_alte_brown <- h3_to_geo_boundary_sf(unlist(hex_alte_brown))
-    
     ## Compute statistics
     radiosIVS_filt <- data$radiosIVS %>%
         filter(cod_prov == COD_ALTE_BROWN) %>%
@@ -76,14 +73,13 @@ process_data <- function(data) {
                hogares_hacinados = hogares * porc_hogar,
                densidad_hogares_hacinados = hogares_hacinados / area)  %>%
         st_transform(crs = st_crs(hex_alte_brown)) # FIXME: needed?
-    
     ## FIXME: pending!
     ## Calcular la poblacion total y hacinados en un poligono.
-    ##
-    
+    pop = calcular_poblacion_h3(radiosIVS_filt)
     return(c(data, list(radiosIVS_filt = radiosIVS_filt,
                         hex_municipios = hex_municipios,
-                        hex_alte_brown = hex_alte_brown)))
+                        hex_alte_brown = hex_alte_brown,
+                        pop = pop)))
 }
 
 ## FIXME: check docs!
@@ -142,31 +138,27 @@ plot_histogramas <- function(data) {
 #'
 #' @params radios sf object.
 #' returns hex_list matrix with transferred data
-calcular_poblacion_h3  <- function(radios) {
-    hex_list <- list()
+calcular_poblacion_h3 <- function(radios) {
+    hex_list <- data.frame()
     for (r in 1:nrow(radios)) {
         hex <- polyfill(radios$geometry[r], res = RESOLUCION)
         densidad <- radios$denspobl_menor_a_10[r]
         densidad_hogares_hacinados <-radios$densidad_hogares_hacinados[r]
-
-        for (h in 1:length(hex)) {
-            polig <- h3_to_geo_boundary_sf(hex[h])
-            polig <- st_transform(polig, st_crs(radios$geometry[r]))
-            areas <- st_area(
-                st_intersection(
-                    polig$geometry,
-                    radios$geometry[r])
-            )
-            areas <- units::set_units(areas,"hm^2")
-            pop_est <- round(sum(areas * densidad), 3)
-            hac_est <- round(sum(areas * densidad_hogares_hacinados), 5)
-            hex_list <- rbind(hex_list,
-                              c(hex = hex[h],
-                                pop = unlist(pop_est),
-                                hac_est = unlist(hac_est)))
-        }    
+        if (length(hex)) { 
+            for (h in 1:length(hex)) {
+                polig <- h3_to_geo_boundary_sf(hex[h])
+                polig <- st_transform(polig, st_crs(radios$geometry[r]))
+                areas <- st_area(
+                    st_intersection(
+                        polig$geometry,
+                        radios$geometry[r])
+                )
+                areas <- units::set_units(areas,"hm^2")
+                polig["pop"] <- round(sum(areas * densidad), 3)
+                polig["hac"] <- round(sum(areas * densidad_hogares_hacinados), 5)
+                hex_list <- rbind(hex_list, polig)
+            }
+        }
     }
-    hex_list[, "pop"] = as.numeric(hex_list[, "pop"])
-    hex_list[, "hac_est"] = as.numeric(hex_list[, "hac_est"])
     return(hex_list)
 }
