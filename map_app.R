@@ -6,7 +6,13 @@ source("src/constants.R")
 source("src/helpers.R")
 
 ## Load and process data
-data = load_data() %>% process_data()
+filename = "data/merenderos_data"
+if (file.exists(filename)) {
+    load(file=filename)
+} else {
+    data = load_data() %>% process_data()
+    save(data, file=filename)
+}
 
 ## Define the UI for the Shiny App
 ui <- fluidPage(
