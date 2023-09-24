@@ -34,5 +34,8 @@ RESOLUCION <- 9
 ## App
 TITLE_APP <- "Merenderos"
 
-# Colores
+## Colores
 PALETA_HEXAGONOS = c("yellow", "darkgreen")
+
+## Cache
+PROCESSED_DATA_PATH = "data/merenderos_data.rdata"

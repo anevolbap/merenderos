@@ -1,6 +1,16 @@
 library(sf)
 library(h3)
 
+#' Read pre-loaded processed data. 
+load_and_process_data <- function() {
+    if (file.exists(PROCESSED_DATA_PATH)) {
+        load(file=PROCESSED_DATA_PATH)
+    } else {
+        data = load_data() %>% process_data()
+        save(data, file=PROCESSED_DATA_PATH)
+    }
+}
+
 #' Load all required data
 #' 
 #' @returns A list of sf dataframes.
