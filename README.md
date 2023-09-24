@@ -4,12 +4,12 @@ Mapa interactivo de merenderos del municipio de Almirante Brown.
 
 ## Instalación 
 
-El primer paso es clonar el repositorio o descargar su código fuente.
+Clonar el repositorio o descargar su código fuente.
 ``` bash
 git clone git@github.com:anevolbap/merenderos.git
 ```
 
-Segundo, instalar las dependencias necesarias manualmente o con la librería [`renv`](https://rstudio.github.io/renv/articles/renv.html "renv").
+Instalar las dependencias necesarias manualmente o con la librería [`renv`](https://rstudio.github.io/renv/articles/renv.html "renv").
 ``` rdoc
 # install.packages("renv")
 renv::restore()
@@ -32,3 +32,6 @@ siguiente [link](pendiente "pendiente") (pendiente).
 ## Colaboración
 
 Abrir un [issue](https://docs.github.com/es/issues/tracking-your-work-with-issues/creating-an-issue "lo qué?") aquí en Github.
+
+## Links y referencias.
+- [https://r-spatial.github.io/sf/]([url](https://r-spatial.github.io/sf/))
