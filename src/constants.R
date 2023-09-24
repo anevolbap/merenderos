@@ -23,13 +23,16 @@ MUNICIPIOS <- list("Municipio Almirante Brown",
 MUNICIPIO_CODE_NCHAR <- 5
 COD_ALTE_BROWN <- "06028"
 
-## MAP
+## Map
 ALMTE_BROWN_LAT <- -34.8272 # latitud
 ALMTE_BROWN_LNG <- -58.3772 # longitud
 MAP_ZOOM_INIT <- 12 # initial zoom (higher number <- closer view)
 
-## HEXAGONS
+## Hexagons h3
 RESOLUCION <- 9
 
-## APP
+## App
 TITLE_APP <- "Merenderos"
+
+# Colores
+PALETA_HEXAGONOS = c("yellow", "darkgreen")

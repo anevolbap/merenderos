@@ -31,8 +31,8 @@ server <- function(input, output) {
             data$radiosIVS_filt$denspobl_menor_a_10, 7
         )
         ## Plot localidades
-        tm_shape(data$localidades, name="Localidades") +
-            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
+        tm_shape(data$localidades, name = "Localidades") +
+            tm_polygons(border.col = 1, lwd = 2, col = "black", alpha = 0) +
             ## Plot population dataframe
             tm_shape(data$radiosIVS_filt) +
             tm_polygons("pobl_menor_a_10", breaks = cortes, alpha = 0.3) +
@@ -46,14 +46,23 @@ server <- function(input, output) {
     })
 
     output$map_hex <- renderTmap({
+        cortes = generar_cortes(data$pop$pop, 7)
+
         ## Plot hexagons
+        # aux = h3_to_geo_boundary_sf(unlist(data$pop))
+        # print(head(aux))
         tm_shape(data$localidades, name="Localidades") +
             tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
             tm_shape(data$hex_municipios, name="hex_municipios")  +
             tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
             tm_shape(data$hex_alte_brown, name = "hex_alte_brown") +
-            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0)
-    })
+            tm_polygons(border.col = 1, lwd = 2, col ="black", alpha = 0) +
+            tm_shape(data$pop, name="pop") + 
+            tm_polygons("pop",  palette = PALETA_HEXAGONOS, breaks = cortes,
+                        border.col = "black", border.alpha = .5, 
+                        popup.vars=c("Pop"="pop", "Hac"="hac") 
+)
+})
 }
 
 ## Run the Shiny App
