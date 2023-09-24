@@ -6,7 +6,7 @@ source("src/constants.R")
 source("src/helpers.R")
 
 ## Load and process data
-data = load_data() %>% process_data()
+load_and_process()
 
 ## Define the UI for the Shiny App
 ui <- fluidPage(
