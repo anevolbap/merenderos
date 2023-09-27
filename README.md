@@ -17,7 +17,7 @@ renv::restore()
 
 Por último, desde la consola de R, abrir la aplicación de Shiny en el navegador.
 ``` rdoc
-shiny::run_app("mapa_app.R")
+shiny::run_app("app.R")
 ```
 
 ## Datos
