@@ -6,7 +6,7 @@ source("src/constants.R")
 source("src/helpers.R")
 
 ## Load and process data
-load_and_process()
+load_and_process_data()
 
 ## Define the UI for the Shiny App
 ui <- fluidPage(
@@ -43,8 +43,8 @@ server <- function(input, output) {
             ## Merenderos y efectores
             plot_hex(data$merenderos, "merenderos", RESOLUCION) +
             plot_hex(data$efectores, "efectores", RESOLUCION)
-    })
-
+    }) %>%
+        bindCache()
     output$map_hex <- renderTmap({
         cortes = generar_cortes(data$pop$pop, 7)
 
@@ -62,7 +62,8 @@ server <- function(input, output) {
                         border.col = "black", border.alpha = .5, 
                         popup.vars=c("Pop"="pop", "Hac"="hac") 
 )
-})
+}) %>%
+        bindCache()
 }
 
 ## Run the Shiny App
